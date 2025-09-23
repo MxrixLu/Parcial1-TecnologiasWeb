@@ -6,13 +6,6 @@ interface EpisodesListProps {
 }
 
 export default function EpisodesList({ episodes }: EpisodesListProps) {
-  if (!episodes || episodes.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500 text-lg">No hay episodios</p>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full max-w-md">
