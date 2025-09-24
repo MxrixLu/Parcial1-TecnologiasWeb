@@ -4,7 +4,7 @@ import { cn } from '../lib/utils';
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
 import { useFavorites } from '../lib/FavoritesContext';
-// import { toast } from "sonner"
+import { toast } from "sonner";
 
 
 
@@ -20,9 +20,9 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
   const handleFavoriteClick = () => {
     toggle(episode);
     if (isCurrentlyFavorite) {
-      alert('Removido de favoritos');
+      toast.info(`"${episode.name}" removido de favoritos`);
     } else {
-      alert('Añadido a favoritos ❤️');
+      toast.success(`"${episode.name}" añadido a favoritos ❤️`);
     }
   };
   
@@ -33,7 +33,7 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
     )}>
       <button
         onClick={handleFavoriteClick}
-        className={cn("absolute top-3 right-3 p-2 rounded-full",
+        className={cn("absolute top-3 right-3",
           isCurrentlyFavorite? "text-red-500 hover:text-red-600" : "text-gray-400 hover:text-red-500"
         )}
       >
@@ -44,7 +44,7 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
       </button>
 
       {/* Episode Fecha */}
-      <div className="text-sm text-gray-500 font-medium">{episode.air_date}</div>
+      <div className="text-sm text-gray-500 ">{episode.air_date}</div>
 
       {/* Episode Título */}
       <h3 className="text-lg text-gray-800">{episode.name}</h3>
@@ -52,10 +52,10 @@ export default function EpisodeCard({ episode }: EpisodeCardProps) {
       {/* personajes */}
       <div className="space-y-3">
         <h4 className="font-medium text-gray-600">Personajes:</h4>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-5">
           {displayCharacters.map((character) => (
-            <div key={character.id} className="flex flex-col items-center space-y-1">
-              <div className="relative w-12 h-12 rounded-full">
+            <div key={character.id} className="flex flex-col items-center">
+              <div className="relative w-12 h-12">
                 <Image
                   src={character.image}
                   alt={character.name}

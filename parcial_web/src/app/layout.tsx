@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { FavoritesProvider } from "../lib/FavoritesContext";
-// import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "sonner";
 
 
 const geistSans = Geist({
@@ -33,7 +33,7 @@ export default function RootLayout({
           <FavoritesProvider>
             {children}
           </FavoritesProvider>
-          {/* <Toaster /> */}
+          <Toaster position="top-right" />
       </body>
     </html>
   );

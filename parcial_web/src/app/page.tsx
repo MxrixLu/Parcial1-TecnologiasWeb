@@ -1,14 +1,18 @@
-import { useState } from 'react';
+'use client'
+import { useState, useEffect } from 'react';
 import EpisodesList from '../components/EpisodesList'; 
 import Favorites from '../components/Favorites'; 
 import UserForm from '../components/UserForm';
 import { fetchEpisodesWithCharacters } from '../lib/api';
 import { Episode } from '@/types/episode';
 
-export default async function Home() {
-  const episodes = await fetchEpisodesWithCharacters();
-  const [setEpisodes] = useState(episodes);
+export default function Home() {
+  const [episodesList, setEpisodes] = useState<Episode[]>([]);
   const addEpisode = (nuevo: Episode) => setEpisodes(prev => [...prev, nuevo]);
+
+  useEffect(() => {
+    fetchEpisodesWithCharacters().then(setEpisodes);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -19,16 +23,16 @@ export default async function Home() {
         
         <div className="flex gap-8">
           <div className="flex-shrink-0">
-            <EpisodesList episodes={episodes} />
+            <EpisodesList episodes={episodesList} />
           </div>
           
           <div className="flex-1 space-y-6">
-            <section className="bg-white rounded-lg shadow p-6">
+            <section className="bg-white">
               <h2 className="text-2xl font-semibold mb-4">Favorites</h2>
               <Favorites />
             </section>
             
-            <section className="bg-white rounded-lg shadow p-6">
+            <section className="bg-white">
               <h2 className="text-2xl font-semibold mb-4">Formulario</h2>
               <UserForm onCreateItem={addEpisode} />
             </section>

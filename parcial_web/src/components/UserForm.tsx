@@ -1,77 +1,107 @@
 'use client'
 import { Episode } from "@/types/episode";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { fetchCharactersByIds } from "@/lib/api";
 import { useState } from "react";
 
-export default function UserForm(onCreateItem: (nuevo: Episode) => any) {
-    const [titulo, setTitulo] = useState('');
-    const [personajes, setPersonajes] = useState('');
-    const [error, setError] = useState('');
+interface UserFormProps {
+  onCreateItem: (nuevo: Episode) => void;
+}
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+interface FormData {
+  titulo: string;
+  personajes: string;
+}
+
+export default function UserForm({ onCreateItem }: UserFormProps) {
+    const { 
+        register, 
+        handleSubmit, 
+        reset, 
+        formState: { errors } 
+    } = useForm<FormData>();
+    
+    const [isLoading, setIsLoading] = useState(false);
+
+    const onSubmit = async (data: FormData) => {
+        setIsLoading(true);
         
-        if (titulo.length < 6) {
-            setError('El título debe tener mínimo 6 caracteres');
-            return;
+        try {
+            // Obtener datos de los personajes desde la API
+            const characterIds = data.personajes.split('-');
+            const charactersData = await fetchCharactersByIds(characterIds);
+            
+            const nuevoEpisode: Episode = {
+                id: Date.now(),
+                name: data.titulo,
+                air_date: new Date().toLocaleDateString('es-ES'),
+                episode: `S01E${Date.now().toString().slice(-2)}`,
+                characters: characterIds.map(id => `https://rickandmortyapi.com/api/character/${id}`),
+                charactersData: charactersData, 
+                url: '',
+                created: new Date().toISOString(),
+            };
+            
+            onCreateItem(nuevoEpisode);
+            toast.success(`Episodio "${data.titulo}" guardado correctamente con ${charactersData.length} personajes`);
+            reset();
+        } catch (error) {
+            console.error('Error creating episode:', error);
+            toast.error('Error al crear el episodio. Verifica que los IDs de personajes sean válidos.');
+        } finally {
+            setIsLoading(false);
         }
-        
-        if (!personajes.trim()) {
-            setError('Los personajes son requeridos');
-            return;
-        }
-
-        const fechaCreacion = new Date().toLocaleDateString('es-ES');
-        
-        const nuevoEpisode: Episode = {
-            id: Date.now(), // id temporal único
-            name: titulo,
-            air_date: new Date().toLocaleDateString('es-ES'),
-            episode: '', // puedes dejarlo vacío o pedirlo en el formulario si lo necesitas
-            characters: personajes.split(',').map(p => p.trim()),
-            charactersData: [], // vacío porque no hay personajes reales
-            url: '',
-            created: new Date().toISOString(),
-        };
-        onCreateItem(nuevoEpisode);
-
-
-        setError('');
-        alert(`Título: ${titulo}\nPersonajes: ${personajes}\nFecha de creación: ${fechaCreacion}`);
-        setTitulo('');
-        setPersonajes('');
-
-
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                    {error}
-                </div>
-            )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Campo Título */}
+            <div>
+                <input 
+                    {...register("titulo", {
+                        required: "El título es requerido",
+                        minLength: {
+                            value: 6,
+                            message: "El título debe tener mínimo 6 caracteres"
+                        }
+                    })}
+                    placeholder="Título (mínimo 6 caracteres)" 
+                    className="border p-2 w-full rounded"
+                />
+                {errors.titulo && (
+                    <div className="text-red-500 text-sm mt-1">
+                        {errors.titulo.message}
+                    </div>
+                )}
+            </div>
             
-            <input 
-                value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
-                placeholder="Título (mínimo 6 caracteres)" 
-                className="border p-2 w-full rounded"
-                minLength={6}
-            />
-            
-            <input 
-                value={personajes}
-                onChange={(e) => setPersonajes(e.target.value)}
-                placeholder="Personajes" 
-                className="border p-2 w-full rounded"
-                required
-            />
+            {/* Campo Personajes */}
+            <div>
+                <input 
+                    {...register("personajes", {
+                        required: "Los IDs de personajes son requeridos",
+                        pattern: {
+                            value: /^\d+-\d+-\d+-\d+-\d+$/,
+                            message: "Formato inválido. Use: 12-14-1-23-8 (5 IDs separados por guiones)"
+                        }
+                    })}
+                    placeholder="IDs de personajes (ej: 12-14-1-23-8)" 
+                    className="border p-2 w-full rounded"
+                />
+                {errors.personajes && (
+                    <div className="text-red-500 text-sm mt-1">
+                        {errors.personajes.message}
+                    </div>
+                )}
+            </div>
             
             <button 
                 type="submit" 
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                disabled={isLoading}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-                Crear Episodio
+                {isLoading ? 'Cargando personajes...' : 'Crear Episodio'}
             </button>
         </form>
     );

@@ -34,3 +34,22 @@ export async function fetchEpisodesWithCharacters(): Promise<Episode[]> {
     return episodesWithCharacters;
   }
 
+export async function fetchCharactersByIds(ids: string[]): Promise<Character[]> {
+  try {
+    const idsString = ids.join(',');
+    const response = await fetch(`https://rickandmortyapi.com/api/character/${idsString}`);
+    
+    if (!response.ok) {
+      console.error('Error fetching characters:', response.statusText);
+      return [];
+    }
+    
+    const data = await response.json();
+    
+    return Array.isArray(data) ? data : [data];
+  } catch (error) {
+    console.error('Error fetching characters by IDs:', error);
+    return [];
+  }
+}
+
