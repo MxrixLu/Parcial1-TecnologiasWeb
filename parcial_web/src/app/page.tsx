@@ -18,7 +18,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-8">
         <h1 className="text-4xl font-bold text-center mb-8 text-gray-800">
-          Episodios y Personajes "RICK AND MORTY"
+          Episodios y Personajes RICK AND MORTY
         </h1>
         
         <div className="flex gap-8">
