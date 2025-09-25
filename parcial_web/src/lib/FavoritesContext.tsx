@@ -15,7 +15,6 @@ const FAVORITES_KEY = 'rick-morty-favorites';
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [favoritos, setFavoritos] = useState<Episode[]>([]);
 
-  // Cargar favoritos desde localStorage al inicializar
   useEffect(() => {
     try {
       const stored = localStorage.getItem(FAVORITES_KEY);
